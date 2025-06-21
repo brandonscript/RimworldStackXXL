@@ -97,16 +97,13 @@ cp "bin/$BUILD_CONFIG/$PROJECT_NAME.dll" "Resources/v1.6/Assemblies/"
 print_status "Updating build timestamp..."
 BUILD_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S %Z')
 
-# First, remove any existing build timestamp line
+# Simple regex replacement - find existing build timestamp and replace it
 if [[ "$OSTYPE" == "darwin"* ]]; then
   # macOS version
-  sed -i '' '/^Build: /d' "Resources/About/About.xml"
-  # Then add the new timestamp after <description>
-  sed -i '' "s|<description>|<description>\nBuild: $BUILD_TIMESTAMP\n|" "Resources/About/About.xml"
+  sed -i '' "s/^Build: [0-9][0-9][0-9][0-9].*/Build: $BUILD_TIMESTAMP/" "Resources/About/About.xml"
 else
   # Linux version
-  sed -i '/^Build: /d' "Resources/About/About.xml"
-  sed -i "s|<description>|<description>\nBuild: $BUILD_TIMESTAMP\n|" "Resources/About/About.xml"
+  sed -i "s/^Build: [0-9][0-9][0-9][0-9].*/Build: $BUILD_TIMESTAMP/" "Resources/About/About.xml"
 fi
 
 print_status "Assembly copied to mod structure"

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Verse;
 using RimWorld;
+using HarmonyLib;
 
 namespace StackXXL
 {
@@ -52,7 +53,7 @@ namespace StackXXL
 
         // Advanced caching for asset changes and selective updates
         private static Dictionary<ThingDef, CategoryType> cachedCategoryTypes = new Dictionary<ThingDef, CategoryType>();
-        private static Dictionary<ThingDef, int> originalStackLimits = new Dictionary<ThingDef, int>();
+        public static Dictionary<ThingDef, int> originalStackLimits = new Dictionary<ThingDef, int>();
         private static HashSet<CategoryType> changedCategories = new HashSet<CategoryType>();
         private static int lastAssetVersion = -1;
         private static bool isInitialized = false;
@@ -258,8 +259,10 @@ namespace StackXXL
             meatRawCategory = ThingCategoryDefOf.MeatRaw;
         }
 
-        private static void UpdateStackLimit(ThingDef thing, double multiplier)
+        private static int UpdateStackLimit(ThingDef thing, double multiplier)
         {
+            int oldLimit = thing.stackLimit;
+
             if (multiplier != 1.0)
             {
                 // Use original stack limit if available, otherwise current limit
@@ -271,19 +274,26 @@ namespace StackXXL
                 // Reset to original if multiplier is 1.0
                 thing.stackLimit = originalStackLimits[thing];
             }
+
+            return oldLimit;
         }
 
-        private void LogCategoryOptimized(ThingDef d, string categoryName)
+        private void LogCategoryOptimized(ThingDef d, string categoryName, int oldLimit, int newLimit)
         {
             if (debugMode.Value)
             {
                 // Use StringBuilder to avoid string concatenation overhead
-                var sb = new StringBuilder(64);
+                var sb = new StringBuilder(80);
                 sb.Append(d.defName);
                 sb.Append(" ");
                 sb.Append(d.thingCategories[0].defName);
                 sb.Append(" ");
                 sb.Append(categoryName);
+                sb.Append(" (");
+                sb.Append(oldLimit);
+                sb.Append("→");
+                sb.Append(newLimit);
+                sb.Append(")");
                 Logger.Message(sb.ToString());
             }
         }
@@ -426,8 +436,8 @@ namespace StackXXL
                         continue;
                 }
 
-                UpdateStackLimit(thing, multiplier);
-                LogCategoryOptimized(thing, categoryName);
+                int oldLimit = UpdateStackLimit(thing, multiplier);
+                LogCategoryOptimized(thing, categoryName, oldLimit, thing.stackLimit);
                 processedCount++;
             }
 
@@ -495,6 +505,87 @@ namespace StackXXL
         public override void Initialize()
         {
             // Empty - all initialization happens in DefsLoaded
+        }
+    }
+
+    // Harmony patch to add stack limit information to item tooltips
+    [HarmonyPatch(typeof(Thing), "GetInspectString")]
+    public static class Thing_GetInspectString_Patch
+    {
+        public static void Postfix(Thing __instance, ref string __result)
+        {
+            // Only show for stackable items
+            if (__instance.def.stackLimit > 1)
+            {
+                string stackInfo = GetStackInfo(__instance.def);
+
+                if (!string.IsNullOrEmpty(stackInfo))
+                {
+                    if (!string.IsNullOrEmpty(__result))
+                    {
+                        __result += "\n" + stackInfo;
+                    }
+                    else
+                    {
+                        __result = stackInfo;
+                    }
+                }
+            }
+        }
+
+        public static string GetStackInfo(ThingDef def)
+        {
+            // Try to get the original stack limit if we have it cached
+            if (StackXXLMod.originalStackLimits != null &&
+                StackXXLMod.originalStackLimits.ContainsKey(def))
+            {
+                int originalLimit = StackXXLMod.originalStackLimits[def];
+                int currentLimit = def.stackLimit;
+
+                if (currentLimit != originalLimit)
+                {
+                    // Calculate multiplier
+                    double multiplier = (double)currentLimit / originalLimit;
+                    string multiplierText = multiplier == Math.Round(multiplier) ?
+                        $"x{multiplier:F0}" : $"x{multiplier:F1}";
+
+                    return $"Stack size: {currentLimit} ({originalLimit} {multiplierText})";
+                }
+                else
+                {
+                    return $"Stack size: {currentLimit}";
+                }
+            }
+
+            return $"Stack size: {def.stackLimit}";
+        }
+    }
+
+    // Harmony patch to add stack limit information to the detailed stats window
+    [HarmonyPatch(typeof(StatsReportUtility), "StatsToDraw", new Type[] { typeof(Thing) })]
+    public static class StatsReportUtility_StatsToDraw_Patch
+    {
+        public static void Postfix(Thing thing, ref IEnumerable<StatDrawEntry> __result)
+        {
+            if (thing?.def?.stackLimit > 1)
+            {
+                var entries = __result.ToList();
+
+                // Get stack info
+                string stackInfo = Thing_GetInspectString_Patch.GetStackInfo(thing.def);
+
+                // Create a new stat entry for stack size
+                var stackEntry = new StatDrawEntry(
+                    StatCategoryDefOf.Basics,
+                    "Stack size",
+                    stackInfo.Replace("Stack size: ", ""),
+                    "The maximum number of items that can be stacked together.",
+                    5100 // Display order - after mass but before other stats
+                );
+
+                entries.Add(stackEntry);
+                __result = entries;
+            }
         }
     }
 }
