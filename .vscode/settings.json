@@ -1,0 +1,17 @@
+{
+  "dotnet.preferCSharpExtension": true,
+  "omnisharp.enableRoslynAnalyzers": false,
+  "omnisharp.enableEditorConfigSupport": false,
+  "omnisharp.enableAsyncCompletion": false,
+  "omnisharp.useModernNet": false,
+  "csharp.semanticHighlighting.enabled": false,
+  "csharp.showOmnisharpLogOnError": false,
+  "files.exclude": {
+    "**/bin/**": true,
+    "**/obj/**": true
+  },
+  "csharp.suppressDotnetRestoreNotification": true,
+  "csharp.suppressDotnetInstallWarning": true,
+  "csharp.suppressBuildAssetsNotification": true,
+  "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": false
+}

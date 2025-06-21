@@ -1,0 +1,16 @@
+root = true
+
+[*.cs]
+# Disable specific analyzers that cause issues with RimWorld modding
+dotnet_analyzer_diagnostic.CS0246.severity = none # Type or namespace name could not be found
+dotnet_analyzer_diagnostic.CS0518.severity = none # Predefined type is not defined or imported
+dotnet_analyzer_diagnostic.CS0103.severity = none # Name does not exist in current context
+dotnet_analyzer_diagnostic.CS1061.severity = none # Does not contain a definition
+
+# RimWorld mod specific settings
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true

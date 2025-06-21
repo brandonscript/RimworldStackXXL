@@ -1,0 +1,23 @@
+{
+  "MsBuild": {
+    "UseLegacySdkResolver": false,
+    "LoadProjectsOnDemand": false,
+    "EnablePackageAutoRestore": false,
+    "MSBuildOverride": {
+      "MSBuildPath": null,
+      "Name": "dotnet"
+    }
+  },
+  "RoslynExtensionsOptions": {
+    "EnableAnalyzersSupport": false,
+    "EnableImportCompletion": true,
+    "EnableAsyncCompletion": true
+  },
+  "FormattingOptions": {
+    "EnableEditorConfigSupport": true,
+    "OrganizeImports": true
+  },
+  "Sdk": {
+    "IncludePrereleases": false
+  }
+}

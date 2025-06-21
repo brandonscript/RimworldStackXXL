@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "path": "RimworldStackXXL",
+      "name": "👨‍💻 Project"
+    },
+    {
+      "path": ".",
+      "name": "🦑 Root"
+    }
+  ],
+  "settings": {
+    "files.associations": {
+      "*.cs": "csharp"
+    },
+    "files.exclude": {
+      "**/.git": true,
+      "**/.svn": true,
+      "**/.hg": true,
+      "**/CVS": true,
+      "**/.DS_Store": true,
+      "**/*.log": true,
+      "RimworldStackXXL": true
+    }
+  }
+}
