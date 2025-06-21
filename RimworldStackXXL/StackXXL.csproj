@@ -33,6 +33,10 @@
       <HintPath>Libraries\HugsLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>Libraries\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>Libraries\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -42,5 +46,9 @@
   <ItemGroup>
     <Folder Include="Libraries\" />
     <Folder Include="Resources\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="StackXXLMod.orig.cs" />
   </ItemGroup>
 </Project>

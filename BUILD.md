@@ -7,6 +7,11 @@ This document explains how to build and test the StackXXL mod for RimWorld on ma
 1. **.NET SDK**: Install from [Microsoft's website](https://dotnet.microsoft.com/download)
 2. **RimWorld**: Installed on your Mac (Steam or standalone)
 3. **HugsLib**: Required dependency for the mod
+4. **Required DLLs**: Copy the following files to the `Libraries/` folder:
+   - `Assembly-CSharp.dll` (from RimWorld installation)
+   - `HugsLib.dll` (from HugsLib mod)
+   - `0Harmony.dll` (from HugsLib mod or Harmony mod)
+   - `UnityEngine.dll` (from RimWorld installation)
 
 ## Quick Build
 
@@ -32,7 +37,8 @@ rm -rf bin obj
 dotnet build StackXXL.csproj --configuration Release
 
 # Copy assembly to mod structure
-cp bin/Release/StackXXL.dll Resources/v1.3+/Assemblies/
+cp bin/Release/StackXXL.dll Resources/v1.5/Assemblies/
+cp bin/Release/StackXXL.dll Resources/v1.6/Assemblies/
 ```
 
 ## Installation
@@ -95,6 +101,7 @@ This version includes several performance optimizations:
 
 - Ensure .NET SDK is installed: `dotnet --version`
 - Check that all reference DLLs are in the `Libraries` folder
+- **Missing 0Harmony.dll**: Copy `0Harmony.dll` from your HugsLib mod installation to `Libraries/`
 - Clean build: `rm -rf bin obj` then rebuild
 
 ### Runtime Issues
@@ -104,11 +111,20 @@ This version includes several performance optimizations:
 - Enable debug mode in mod settings for detailed logging
 - Restart RimWorld after changing mod settings
 
+### Harmony/HugsLib Dependency Errors
+
+If you see errors like `ReflectionTypeLoadException` or `Could not resolve type with token 0100009b (from typeref, class/assembly HarmonyLib.CodeInstruction)`:
+
+1. **Ensure 0Harmony.dll is present**: Copy `0Harmony.dll` to the `Libraries/` folder
+2. **Version mismatch**: Make sure you're using compatible versions of HugsLib and Harmony
+3. **Rebuild the mod**: Run `./build.sh` after adding the missing DLL
+4. **Check HugsLib installation**: Ensure HugsLib is properly installed and working in RimWorld
+
 ### Mod Not Loading
 
 - Confirm mod is in the correct directory structure
 - Check that `About.xml` is present and valid
-- Ensure assembly is in the correct version folder (`v1.3+/Assemblies/`)
+- Ensure assembly is in the correct version folder (`v1.5/Assemblies/` or `v1.6/Assemblies/`)
 
 ## Development
 
@@ -123,7 +139,8 @@ RimworldStackXXL/
 └── Resources/            # Mod content
     ├── About/            # Mod metadata
     ├── Languages/        # Translations
-    └── v1.3+/Assemblies/ # Compiled mod DLL
+    ├── v1.5/Assemblies/  # Compiled mod DLL for RimWorld 1.5
+    └── v1.6/Assemblies/  # Compiled mod DLL for RimWorld 1.6+
 ```
 
 ### Making Changes
@@ -136,6 +153,7 @@ RimworldStackXXL/
 
 This mod supports RimWorld versions:
 
-- 1.0, 1.1, 1.2, 1.3, 1.4+
+- 1.5, 1.6+
 
 The build script copies the assembly to all version folders for maximum compatibility.
+
